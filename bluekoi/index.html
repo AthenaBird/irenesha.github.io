@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+<!--
+	Strata by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>BlueKoi - Irene Sha</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<style>
+			.carousel {
+				position: relative;
+				max-width: 100%;
+				overflow: hidden;
+				border-radius: 4px;
+				margin: 1.5em 0;
+			}
+			.carousel-track {
+				display: flex;
+				transition: transform 0.5s ease-in-out;
+			}
+			.carousel-slide {
+				flex: 0 0 100%;
+			}
+			.carousel-slide img {
+				display: block;
+				width: 100%;
+			}
+			.carousel-arrow {
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+				background: rgba(0, 0, 0, 0.4);
+				color: #fff;
+				border: none;
+				width: 2.5em;
+				height: 2.5em;
+				line-height: 2.5em;
+				text-align: center;
+				border-radius: 50%;
+				cursor: pointer;
+				font-size: 1.1em;
+			}
+			.carousel-arrow:hover {
+				background: rgba(0, 0, 0, 0.65);
+			}
+			.carousel-arrow.prev {
+				left: 0.75em;
+			}
+			.carousel-arrow.next {
+				right: 0.75em;
+			}
+			.carousel-dots {
+				position: absolute;
+				bottom: 0.75em;
+				left: 0;
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				gap: 0.5em;
+			}
+			.carousel-dot {
+				width: 0.6em;
+				height: 0.6em;
+				border-radius: 50%;
+				background: rgba(255, 255, 255, 0.5);
+				cursor: pointer;
+				border: none;
+				padding: 0;
+			}
+			.carousel-dot.active {
+				background: #fff;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+		<div id="header-placeholder"></div>
+
+		<script>
+		fetch("/header.html")
+			.then(response => response.text())
+			.then(data => {
+			document.getElementById("header-placeholder").innerHTML = data;
+			});
+		</script>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- One -->
+					<section id="one">
+						<header class="major">
+							<h2>BlueKoi</h2>
+						</header>
+						<video controls width="100%" style="max-width: 100%; border-radius: 4px;">
+							<source src="/IROS25_BlueKoi_Video.MOV" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+
+						<div class="carousel" id="bluekoi-carousel">
+							<div class="carousel-track">
+								<div class="carousel-slide"><img src="/bluekoi/BlueKoi_portfolio_1.png" alt="BlueKoi portfolio 1" /></div>
+								<div class="carousel-slide"><img src="/bluekoi/BlueKoi_portfolio_2.png" alt="BlueKoi portfolio 2" /></div>
+								<div class="carousel-slide"><img src="/bluekoi/BlueKoi_portfolio_3.png" alt="BlueKoi portfolio 3" /></div>
+								<div class="carousel-slide"><img src="/bluekoi/BlueKoi_portfolio_4.png" alt="BlueKoi portfolio 4" /></div>
+							</div>
+							<button class="carousel-arrow prev" aria-label="Previous slide">&#10094;</button>
+							<button class="carousel-arrow next" aria-label="Next slide">&#10095;</button>
+							<div class="carousel-dots"></div>
+						</div>
+
+						<ul class="actions">
+							<li><a href="/IROS25_BlueKoi_Sha.pdf" class="button" target="_blank">IROS 25 Paper</a></li>
+						</ul>
+
+						<p>More about BlueKoi coming soon.</p>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/assets/js/jquery.min.js"></script>
+			<script src="/assets/js/jquery.poptrox.min.js"></script>
+			<script src="/assets/js/browser.min.js"></script>
+			<script src="/assets/js/breakpoints.min.js"></script>
+			<script src="/assets/js/util.js"></script>
+			<script src="/assets/js/main.js"></script>
+
+		<script>
+		(function() {
+			var carousel = document.getElementById('bluekoi-carousel');
+			var track = carousel.querySelector('.carousel-track');
+			var slides = carousel.querySelectorAll('.carousel-slide');
+			var dotsContainer = carousel.querySelector('.carousel-dots');
+			var prevBtn = carousel.querySelector('.carousel-arrow.prev');
+			var nextBtn = carousel.querySelector('.carousel-arrow.next');
+			var current = 0;
+			var intervalId;
+
+			slides.forEach(function(_, i) {
+				var dot = document.createElement('button');
+				dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+				dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+				dot.addEventListener('click', function() { goTo(i); });
+				dotsContainer.appendChild(dot);
+			});
+			var dots = dotsContainer.querySelectorAll('.carousel-dot');
+
+			function goTo(index) {
+				current = (index + slides.length) % slides.length;
+				track.style.transform = 'translateX(-' + (current * 100) + '%)';
+				dots.forEach(function(dot, i) {
+					dot.classList.toggle('active', i === current);
+				});
+			}
+
+			function next() { goTo(current + 1); }
+			function prev() { goTo(current - 1); }
+
+			function startAutoRotate() {
+				intervalId = setInterval(next, 10000);
+			}
+			function stopAutoRotate() {
+				clearInterval(intervalId);
+			}
+
+			nextBtn.addEventListener('click', function() { next(); stopAutoRotate(); startAutoRotate(); });
+			prevBtn.addEventListener('click', function() { prev(); stopAutoRotate(); startAutoRotate(); });
+			carousel.addEventListener('mouseenter', stopAutoRotate);
+			carousel.addEventListener('mouseleave', startAutoRotate);
+
+			startAutoRotate();
+		})();
+		</script>
+
+	</body>
+</html>
