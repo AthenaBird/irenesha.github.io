@@ -13,7 +13,7 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
-$size-header-width: 35%;
+$size-header-width: 26%;
 $size-header-pad: 4em;
 
 // Breakpoints.
@@ -1367,7 +1367,7 @@ $size-header-pad: 4em;
 
 	@include breakpoint('<=large') {
 
-		$size-header-width: 30%;
+		$size-header-width: 22%;
 		$size-header-pad: 3em;
 
 		/* Header */
