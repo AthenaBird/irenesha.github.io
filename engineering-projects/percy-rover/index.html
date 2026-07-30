@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<!--
+	Strata by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>PERCY Rover - Irene Sha</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+		<div id="header-placeholder"></div>
+
+		<script>
+		fetch("/header.html")
+			.then(response => response.text())
+			.then(data => {
+			document.getElementById("header-placeholder").innerHTML = data;
+			});
+		</script>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- One -->
+					<section id="one">
+						<header class="major">
+							<h1>PERCY Rover</h1>
+						</header>
+						<img src="/images/home/PERCY_full.png" alt="PERCY Rover" class="image fit" />
+						<p>Senior thesis project.</p>
+						<p>More about this project coming soon.</p>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/assets/js/jquery.min.js"></script>
+			<script src="/assets/js/jquery.poptrox.min.js"></script>
+			<script src="/assets/js/browser.min.js"></script>
+			<script src="/assets/js/breakpoints.min.js"></script>
+			<script src="/assets/js/util.js"></script>
+			<script src="/assets/js/main.js"></script>
+
+	</body>
+</html>

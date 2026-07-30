@@ -1,0 +1,203 @@
+<!DOCTYPE HTML>
+<!--
+	Strata by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Bird Watching - Irene Sha</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+		<style>
+			/* Bird Log gallery/filter styling, scoped to this page only */
+			.bird-log-stats {
+				color: #999;
+				margin-bottom: 1.5em;
+			}
+			.bird-log-filters {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75em;
+				margin-bottom: 1.5em;
+			}
+			.bird-log-filters > * {
+				flex: 1 1 180px;
+			}
+			.bird-log-filters select,
+			.bird-log-filters input {
+				width: 100%;
+			}
+			#life-list-grid .image.thumb img {
+				aspect-ratio: 1 / 1;
+				object-fit: cover;
+			}
+			.bird-card-caption {
+				margin-top: 0.5em;
+			}
+			.bird-card-caption .common-name {
+				font-weight: 600;
+				display: block;
+			}
+			.bird-card-caption .scientific-name {
+				font-style: italic;
+				color: #999;
+				font-size: 0.85em;
+				display: block;
+			}
+			.bird-log-empty,
+			.bird-log-error {
+				color: #999;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+		<div id="header-placeholder"></div>
+
+		<script>
+		fetch("/header.html")
+			.then(response => response.text())
+			.then(data => {
+			document.getElementById("header-placeholder").innerHTML = data;
+			});
+		</script>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- One -->
+					<section id="one">
+						<header class="major">
+							<h1>Bird Watching</h1>
+						</header>
+						<p>Every bird on this page is one I've photographed myself. The gallery below is my
+						life list -- one photo per species -- searchable by name.</p>
+
+						<p id="bird-log-stats" class="bird-log-stats">Loading your life list...</p>
+
+						<div class="bird-log-filters">
+							<input type="text" id="filterText" placeholder="Search species..." />
+							<select id="sortBy">
+								<option value="alpha">Sort: Alphabetical</option>
+								<option value="newest">Sort: Most recently added</option>
+								<option value="oldest">Sort: First seen (oldest)</option>
+							</select>
+						</div>
+					</section>
+
+				<!-- Two: Life List gallery -->
+					<section id="two">
+						<div id="life-list-grid" class="row gtr-uniform"></div>
+						<p id="life-list-empty" class="bird-log-empty" style="display: none;">No birds logged yet -- check back soon!</p>
+						<p id="bird-log-error" class="bird-log-error" style="display: none;"></p>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/assets/js/jquery.min.js"></script>
+			<script src="/assets/js/jquery.poptrox.min.js"></script>
+			<script src="/assets/js/browser.min.js"></script>
+			<script src="/assets/js/breakpoints.min.js"></script>
+			<script src="/assets/js/util.js"></script>
+			<script src="/assets/js/main.js"></script>
+
+		<!-- Bird Log data (Supabase) -->
+			<script type="module">
+			import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+			// TODO: replace with your Supabase project's values
+			// (Project Settings > API in the Supabase dashboard).
+			// The anon/public key is safe to expose here -- it only grants
+			// the read-only access allowed by this project's RLS policies.
+			const SUPABASE_URL = "https://nojlkerunjeddcffuvbs.supabase.co";
+			const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vamxrZXJ1bmplZGRjZmZ1dmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MjkwNTYsImV4cCI6MjEwMTAwNTA1Nn0.Z5bNSne87PE8roXB81LCtiUf64kgRJh17QLgkh2N3Qk";
+			const BIRD_PHOTOS_BUCKET = "bird-photos";
+
+			const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+			function photoUrl(path) {
+				return supabase.storage.from(BIRD_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
+			}
+
+			function escapeHtml(str) {
+				const div = document.createElement("div");
+				div.textContent = str ?? "";
+				return div.innerHTML;
+			}
+
+			let lifeList = [];
+
+			function matchesFilter(text, query) {
+				return text.toLowerCase().includes(query);
+			}
+
+			function renderLifeList() {
+				const query = document.getElementById("filterText").value.trim().toLowerCase();
+				const sortBy = document.getElementById("sortBy").value;
+
+				let filtered = lifeList.filter(
+					(b) =>
+						!query ||
+						matchesFilter(b.species_common_name, query) ||
+						matchesFilter(b.species_scientific_name || "", query)
+				);
+
+				filtered = filtered.slice().sort((a, b) => {
+					if (sortBy === "alpha") return a.species_common_name.localeCompare(b.species_common_name);
+					if (sortBy === "newest") return new Date(b.first_seen_date) - new Date(a.first_seen_date);
+					return new Date(a.first_seen_date) - new Date(b.first_seen_date);
+				});
+
+				const grid = document.getElementById("life-list-grid");
+				grid.innerHTML = filtered
+					.map(
+						(b) => `
+					<div class="col-4 col-6-medium col-12-small">
+						<span class="image thumb fit">
+							<img src="${photoUrl(b.photo_path)}" alt="${escapeHtml(b.species_common_name)}" />
+						</span>
+						<div class="bird-card-caption">
+							<span class="common-name">${escapeHtml(b.species_common_name)}</span>
+							${b.species_scientific_name ? `<span class="scientific-name">${escapeHtml(b.species_scientific_name)}</span>` : ""}
+						</div>
+					</div>`
+					)
+					.join("");
+
+				document.getElementById("life-list-empty").style.display = filtered.length ? "none" : "block";
+
+				const totalSightings = lifeList.reduce((sum, b) => sum + b.sighting_count, 0);
+				document.getElementById("bird-log-stats").textContent =
+					`${lifeList.length} species | ${totalSightings} sightings logged`;
+			}
+
+			async function loadData() {
+				const { data, error } = await supabase.from("life_list").select("*");
+
+				if (error) {
+					const errorEl = document.getElementById("bird-log-error");
+					errorEl.textContent =
+						"Couldn't load the bird log right now (" +
+						error.message +
+						"). Double check the Supabase URL/key in this page's script.";
+					errorEl.style.display = "block";
+					document.getElementById("bird-log-stats").textContent = "";
+					return;
+				}
+
+				lifeList = data;
+				renderLifeList();
+			}
+
+			document.getElementById("filterText").addEventListener("input", renderLifeList);
+			document.getElementById("sortBy").addEventListener("change", renderLifeList);
+
+			loadData();
+			</script>
+
+	</body>
+</html>
