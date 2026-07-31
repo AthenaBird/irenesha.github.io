@@ -47,10 +47,22 @@
 			.bird-log-lightbox.is-visible {
 				display: flex;
 			}
-			.bird-log-lightbox img {
+			.bird-log-lightbox-content {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
 				max-width: 100%;
 				max-height: 100%;
+			}
+			.bird-log-lightbox img {
+				max-width: 100%;
+				max-height: 80vh;
 				object-fit: contain;
+			}
+			.bird-log-lightbox-caption {
+				color: #fff;
+				margin-top: 0.75em;
+				text-align: center;
 			}
 			.bird-log-lightbox-close {
 				position: fixed;
@@ -104,8 +116,14 @@
 						<header class="major">
 							<h1>Bird Watching</h1>
 						</header>
-						<p>Every bird on this page is one I've photographed myself. The gallery below is my
-						life list -- one photo per species -- searchable by name.</p>
+						<p>I'm no professional photographer but I like to snap pics of birds when I see them, 
+							to create my personal records. Here's a compilation of my almost-life list, 
+							as some birds have managed to slip away from my lens. 
+						</p>
+						<p>My cameras:
+							2025-present: Canon EOS R10, RF100-400/4.5-5.6 
+							2022-2025: Lumix Z...something... camera's in a cabinet somewhere 
+						</p>
 
 						<p id="bird-log-stats" class="bird-log-stats">Loading your life list...</p>
 
@@ -131,7 +149,10 @@
 		<!-- Bird Log lightbox -->
 			<div id="bird-log-lightbox" class="bird-log-lightbox">
 				<button type="button" class="bird-log-lightbox-close" aria-label="Close">&times;</button>
-				<img src="" alt="" />
+				<div class="bird-log-lightbox-content">
+					<img src="" alt="" />
+					<p class="bird-log-lightbox-caption"></p>
+				</div>
 			</div>
 
 		<!-- Scripts -->
@@ -170,16 +191,30 @@
 
 			const lightbox = document.getElementById("bird-log-lightbox");
 			const lightboxImg = lightbox.querySelector("img");
+			const lightboxCaption = lightbox.querySelector(".bird-log-lightbox-caption");
 
-			function openLightbox(src, alt) {
+			function formatDate(dateStr) {
+				const [y, m, d] = dateStr.split("-").map(Number);
+				return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(undefined, {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+					timeZone: "UTC",
+				});
+			}
+
+			function openLightbox(src, alt, dateObserved, location) {
 				lightboxImg.src = src;
 				lightboxImg.alt = alt;
+				lightboxCaption.textContent =
+					dateObserved && location ? `Photo taken on ${formatDate(dateObserved)} at ${location}` : "";
 				lightbox.classList.add("is-visible");
 			}
 
 			function closeLightbox() {
 				lightbox.classList.remove("is-visible");
 				lightboxImg.src = "";
+				lightboxCaption.textContent = "";
 			}
 
 			lightbox.addEventListener("click", (e) => {
@@ -216,7 +251,12 @@
 						(b) => `
 					<div class="col-4 col-6-medium col-12-small">
 						<span class="image thumb fit">
-							<img src="${photoUrl(b.photo_path)}" alt="${escapeHtml(b.species_common_name)}" />
+							<img
+								src="${photoUrl(b.photo_path)}"
+								alt="${escapeHtml(b.species_common_name)}"
+								data-date-observed="${escapeHtml(b.cover_date)}"
+								data-location="${escapeHtml(b.cover_location)}"
+							/>
 						</span>
 						<div class="bird-card-caption">
 							<span class="common-name">${escapeHtml(b.species_common_name)}</span>
@@ -255,8 +295,11 @@
 			document.getElementById("sortBy").addEventListener("change", renderLifeList);
 
 			document.getElementById("life-list-grid").addEventListener("click", (e) => {
-				const img = e.target.closest(".image.thumb img");
-				if (img) openLightbox(img.src, img.alt);
+				const thumb = e.target.closest(".image.thumb");
+				const img = thumb && thumb.querySelector("img");
+				if (img) {
+					openLightbox(img.src, img.alt, img.dataset.dateObserved, img.dataset.location);
+				}
 			});
 
 			loadData();
