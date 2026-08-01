@@ -29,6 +29,20 @@
 			.bird-log-filters input {
 				width: 100%;
 			}
+			/* Row gap lives below the caption (padding-bottom), not above the
+			   photo (padding-top), so each label reads as belonging to the
+			   image directly above it. */
+			#life-list-grid.gtr-uniform {
+				margin-top: 0;
+			}
+			#life-list-grid.gtr-uniform > * {
+				padding-top: 0;
+				padding-bottom: 1.5em;
+			}
+			#life-list-grid .image.thumb {
+				margin-bottom: 0;
+				display: block;
+			}
 			#life-list-grid .image.thumb img {
 				aspect-ratio: 1 / 1;
 				object-fit: cover;
@@ -77,17 +91,14 @@
 				padding: 0.2em 0.3em;
 			}
 			.bird-card-caption {
-				margin-top: 0.5em;
+				margin-top: 0.1em;
+				margin-bottom: 0;
 			}
 			.bird-card-caption .common-name {
 				font-weight: 600;
 				display: block;
-			}
-			.bird-card-caption .scientific-name {
-				font-style: italic;
-				color: #999;
-				font-size: 0.85em;
-				display: block;
+				font-size: 0.9em;
+				line-height: 1.2;
 			}
 			.bird-log-empty,
 			.bird-log-error {
@@ -118,13 +129,7 @@
 						</header>
 						<p>I'm no professional photographer but I like to snap pics of birds when I see them, 
 							to create my personal records. Here's a compilation of my almost-life list, 
-							as some birds have managed to slip away from my lens. 
-						</p>
-						<p>
-							2025-present: Canon EOS R10, RF100-400/4.5-5.6 
-						</p>
-						<p>	
-							2022-2025: Lumix Z...something... camera's in a cabinet somewhere 
+							as some birds have managed to slip away from my lens. Camera: Canon EOS R10, RF100-400/4.5-5.6 
 						</p>
 
 						<p id="bird-log-stats" class="bird-log-stats">Loading your life list...</p>
@@ -266,7 +271,6 @@
 						</span>
 						<div class="bird-card-caption">
 							<span class="common-name">${escapeHtml(b.species_common_name)}</span>
-							${b.species_scientific_name ? `<span class="scientific-name">${escapeHtml(b.species_scientific_name)}</span>` : ""}
 						</div>
 					</div>`
 					)
