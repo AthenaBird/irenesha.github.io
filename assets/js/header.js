@@ -1,6 +1,10 @@
-<!-- Reference copy of the site header. Pages load the nav from /assets/js/header.js
-     at runtime — keep that file in sync when you edit this. -->
-<header id="header">
+// Inlined so every page gets the same nav without a separate header.html
+// fetch (browsers were caching the old "Contact Me" version on localhost).
+(function () {
+  const placeholder = document.getElementById("header-placeholder");
+  if (!placeholder) return;
+
+  placeholder.innerHTML = `<header id="header">
 	<div class="inner">
 		<a href="/" class="image avatar"><img src="/images/profile.jpg" alt="" /></a>
 		<h1><strong>I am Irene Sha</strong>,  <br />
@@ -16,4 +20,5 @@
 			<li><a href="https://www.linkedin.com/in/irene-sha/" class="icon brands fa-linkedin nav-icon-only" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><span class="label">LinkedIn</span></a></li>
 		</ul>
 	</nav>
-</header>
+</header>`;
+})();

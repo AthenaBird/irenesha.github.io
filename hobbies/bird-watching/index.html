@@ -111,13 +111,7 @@
 		<!-- Header -->
 		<div id="header-placeholder"></div>
 
-		<script>
-		fetch("/header.html")
-			.then(response => response.text())
-			.then(data => {
-			document.getElementById("header-placeholder").innerHTML = data;
-			});
-		</script>
+		<script src="/assets/js/header.js?v=2"></script>
 
 		<!-- Main -->
 			<div id="main">
@@ -129,7 +123,7 @@
 						</header>
 						<p>I'm no professional photographer but I like to snap pics of birds when I see them, 
 							to create my personal records. Here's a compilation of my almost-life list, 
-							as some birds have managed to slip away from my lens. Camera: Canon EOS R10, RF100-400/4.5-5.6 
+							as some birds have managed to slip away from my lens. Camera: Ca non EOS R10, RF100-400/4.5-5.6 
 						</p>
 
 						<p id="bird-log-stats" class="bird-log-stats">Loading your life list...</p>

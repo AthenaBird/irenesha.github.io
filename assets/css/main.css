@@ -2695,6 +2695,17 @@ input, select, textarea {
 			font-size: 0.95em;
 		}
 
+		#header .header-nav a.icon:before {
+			margin-right: 0.6em;
+			width: 1.25em;
+			text-align: center;
+			font-size: 0.95em;
+		}
+
+		#header .header-nav a.nav-icon-only:before {
+			margin-right: 0;
+		}
+
 /* Footer */
 
 	#footer .icons {

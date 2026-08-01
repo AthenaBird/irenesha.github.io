@@ -11,15 +11,26 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="/assets/css/main.css" />
 		<style>
+			.placeholder-tile,
+			.hobby-tile {
+				display: block;
+				width: 100%;
+				aspect-ratio: 100 / 66;
+				position: relative;
+				border-radius: 0.35em;
+				overflow: hidden;
+			}
 			.placeholder-tile {
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				width: 100%;
-				padding-top: 66%;
-				position: relative;
-				border-radius: 0.35em;
 				background: linear-gradient(135deg, #2c2c2c, #444444);
+			}
+			.hobby-tile img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
 			}
 			.placeholder-tile i {
 				position: absolute;
@@ -36,13 +47,7 @@
 		<!-- Header -->
 		<div id="header-placeholder"></div>
 
-		<script>
-		fetch("/header.html")
-			.then(response => response.text())
-			.then(data => {
-			document.getElementById("header-placeholder").innerHTML = data;
-			});
-		</script>
+		<script src="/assets/js/header.js?v=2"></script>
 
 		<!-- Main -->
 			<div id="main">
@@ -57,14 +62,18 @@
 						<div class="row">
 							<article class="col-6 col-12-xsmall work-item">
 								<a href="/hobbies/bird-watching/" class="image fit no-lightbox">
-									<span class="placeholder-tile"><i class="fas fa-binoculars"></i></span>
+									<span class="hobby-tile">
+										<img src="/hobbies/bird-watching/Birding%20picture.png" alt="Bird watching" />
+									</span>
 								</a>
 								<h3>Bird Watching</h3>
 								<p>More to come soon.</p>
 							</article>
 							<article class="col-6 col-12-xsmall work-item">
 								<a href="/hobbies/sailplane-gliding/" class="image fit no-lightbox">
-									<span class="placeholder-tile"><i class="fas fa-plane"></i></span>
+									<span class="hobby-tile">
+										<img src="/hobbies/sailplane-gliding/Gliding%20picture.png" alt="Sailplane gliding" />
+									</span>
 								</a>
 								<h3>Sailplane Gliding</h3>
 								<p>More to come soon.</p>
