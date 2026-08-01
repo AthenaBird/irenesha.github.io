@@ -120,8 +120,10 @@
 							to create my personal records. Here's a compilation of my almost-life list, 
 							as some birds have managed to slip away from my lens. 
 						</p>
-						<p>My cameras:
+						<p>
 							2025-present: Canon EOS R10, RF100-400/4.5-5.6 
+						</p>
+						<p>	
 							2022-2025: Lumix Z...something... camera's in a cabinet somewhere 
 						</p>
 
@@ -130,9 +132,10 @@
 						<div class="bird-log-filters">
 							<input type="text" id="filterText" placeholder="Search species..." />
 							<select id="sortBy">
+								<option value="recentSighting" selected>Sort: Newest sighting first</option>
 								<option value="alpha">Sort: Alphabetical</option>
-								<option value="newest">Sort: Most recently added</option>
-								<option value="oldest">Sort: First seen (oldest)</option>
+								<option value="firstSeenNewest">Sort: First seen (newest)</option>
+								<option value="firstSeenOldest">Sort: First seen (oldest)</option>
 							</select>
 						</div>
 					</section>
@@ -177,8 +180,9 @@
 
 			const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-			function photoUrl(path) {
-				return supabase.storage.from(BIRD_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
+			function photoUrl(path, version) {
+				const base = supabase.storage.from(BIRD_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
+				return version ? `${base}?v=${version}` : base;
 			}
 
 			function escapeHtml(str) {
@@ -241,8 +245,9 @@
 
 				filtered = filtered.slice().sort((a, b) => {
 					if (sortBy === "alpha") return a.species_common_name.localeCompare(b.species_common_name);
-					if (sortBy === "newest") return new Date(b.first_seen_date) - new Date(a.first_seen_date);
-					return new Date(a.first_seen_date) - new Date(b.first_seen_date);
+					if (sortBy === "firstSeenNewest") return new Date(b.first_seen_date) - new Date(a.first_seen_date);
+					if (sortBy === "firstSeenOldest") return new Date(a.first_seen_date) - new Date(b.first_seen_date);
+					return new Date(b.last_seen_date) - new Date(a.last_seen_date); // recentSighting (default)
 				});
 
 				const grid = document.getElementById("life-list-grid");
@@ -252,7 +257,8 @@
 					<div class="col-4 col-6-medium col-12-small">
 						<span class="image thumb fit">
 							<img
-								src="${photoUrl(b.photo_path)}"
+								src="${photoUrl(b.photo_path, b.photo_version)}"
+								data-full="${photoUrl(b.original_photo_path || b.photo_path, b.photo_version)}"
 								alt="${escapeHtml(b.species_common_name)}"
 								data-date-observed="${escapeHtml(b.cover_date)}"
 								data-location="${escapeHtml(b.cover_location)}"
@@ -298,7 +304,7 @@
 				const thumb = e.target.closest(".image.thumb");
 				const img = thumb && thumb.querySelector("img");
 				if (img) {
-					openLightbox(img.src, img.alt, img.dataset.dateObserved, img.dataset.location);
+					openLightbox(img.dataset.full || img.src, img.alt, img.dataset.dateObserved, img.dataset.location);
 				}
 			});
 
