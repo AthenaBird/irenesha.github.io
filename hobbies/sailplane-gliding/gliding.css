@@ -1,0 +1,128 @@
+/* Shared styles for the sailplane gliding blog hub and posts */
+.gliding-intro {
+	color: #999;
+	margin-bottom: 1.5em;
+}
+
+.gliding-post-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+}
+
+.gliding-post-lead {
+	margin-bottom: 2em;
+}
+
+.gliding-post-body h2 {
+	margin: 1.5em 0 0.5em;
+}
+
+.gliding-post-body h2:first-child {
+	margin-top: 0;
+}
+
+.gliding-post-body .gliding-figure {
+	margin: 1.5em 0;
+}
+
+.gliding-post-body .gliding-figure img {
+	width: 100%;
+	border-radius: 0.35em;
+	display: block;
+}
+
+.gliding-post-body .gliding-figure figcaption {
+	color: #999;
+	font-size: 0.85em;
+	margin-top: 0.5em;
+	text-align: center;
+}
+
+/* Image left, text right — used on the hub and inside individual posts */
+.gliding-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 1.25em;
+}
+
+.gliding-row-photo {
+	flex: 0 0 38%;
+	max-width: 280px;
+	aspect-ratio: 100 / 66;
+	border-radius: 0.35em;
+	overflow: hidden;
+}
+
+.gliding-row-photo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.gliding-row-text {
+	flex: 1;
+	min-width: 0;
+}
+
+.gliding-row-date {
+	color: #999;
+	font-size: 0.85em;
+	margin: 0 0 0.35em;
+}
+
+.gliding-row-text h1,
+.gliding-row-text h2 {
+	margin: 0 0 0.5em;
+}
+
+.gliding-row-text h1 {
+	font-size: 1.35em;
+}
+
+.gliding-row-text p {
+	margin: 0 0 0.75em;
+}
+
+.gliding-row-text p:last-child {
+	margin-bottom: 0;
+}
+
+.gliding-post-card {
+	display: flex;
+	border-bottom: none;
+	color: inherit;
+}
+
+.gliding-post-card:hover .gliding-row-text h2 {
+	color: #1f9afe;
+}
+
+.gliding-post-card .gliding-row-text h2 {
+	transition: color 0.2s ease;
+}
+
+.gliding-back {
+	margin-bottom: 1.5em;
+}
+
+.gliding-back a {
+	border-bottom: none;
+}
+
+@media screen and (max-width: 736px) {
+	.gliding-row,
+	.gliding-post-card {
+		flex-direction: column;
+	}
+
+	.gliding-row-photo {
+		flex: none;
+		max-width: none;
+		width: 100%;
+	}
+}

@@ -90,6 +90,43 @@
 				border: none;
 				padding: 0.2em 0.3em;
 			}
+			.bird-log-lightbox-nav {
+				position: fixed;
+				top: 50%;
+				transform: translateY(-50%);
+				color: #fff;
+				font-size: 3em;
+				line-height: 1;
+				cursor: pointer;
+				background: none;
+				border: none;
+				padding: 0.2em 0.35em;
+				opacity: 0.75;
+				transition: opacity 0.2s ease;
+			}
+			.bird-log-lightbox-nav:hover {
+				opacity: 1;
+			}
+			.bird-log-lightbox-nav.is-hidden {
+				display: none;
+			}
+			.bird-log-lightbox-prev {
+				left: 0.5em;
+			}
+			.bird-log-lightbox-next {
+				right: 0.5em;
+			}
+			.bird-log-lightbox-counter {
+				color: #999;
+				font-size: 0.85em;
+				margin-top: 0.35em;
+			}
+			@media screen and (max-width: 736px) {
+				.bird-log-lightbox-nav {
+					font-size: 2em;
+					padding: 0.2em;
+				}
+			}
 			.bird-card-caption {
 				margin-top: 0.1em;
 				margin-bottom: 0;
@@ -151,9 +188,12 @@
 		<!-- Bird Log lightbox -->
 			<div id="bird-log-lightbox" class="bird-log-lightbox">
 				<button type="button" class="bird-log-lightbox-close" aria-label="Close">&times;</button>
+				<button type="button" class="bird-log-lightbox-nav bird-log-lightbox-prev" aria-label="Previous photo">&#8249;</button>
+				<button type="button" class="bird-log-lightbox-nav bird-log-lightbox-next" aria-label="Next photo">&#8250;</button>
 				<div class="bird-log-lightbox-content">
 					<img src="" alt="" />
 					<p class="bird-log-lightbox-caption"></p>
+					<p class="bird-log-lightbox-counter"></p>
 				</div>
 			</div>
 
@@ -177,6 +217,11 @@
 			const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vamxrZXJ1bmplZGRjZmZ1dmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MjkwNTYsImV4cCI6MjEwMTAwNTA1Nn0.Z5bNSne87PE8roXB81LCtiUf64kgRJh17QLgkh2N3Qk";
 			const BIRD_PHOTOS_BUCKET = "bird-photos";
 
+			// Official New Jersey state checklist total, per the NJ Bird Records
+			// Committee (njbrc.com/index.php/state-and-review-lists), updated
+			// March 2026. Update this number if/when the NJBRC revises their count.
+			const NJ_STATE_LIST_TOTAL = 508;
+
 			const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 			function photoUrl(path, version) {
@@ -191,10 +236,17 @@
 			}
 
 			let lifeList = [];
+			let sightingsBySpecies = new Map();
 
 			const lightbox = document.getElementById("bird-log-lightbox");
 			const lightboxImg = lightbox.querySelector("img");
 			const lightboxCaption = lightbox.querySelector(".bird-log-lightbox-caption");
+			const lightboxCounter = lightbox.querySelector(".bird-log-lightbox-counter");
+			const lightboxPrev = lightbox.querySelector(".bird-log-lightbox-prev");
+			const lightboxNext = lightbox.querySelector(".bird-log-lightbox-next");
+
+			let currentPhotos = [];
+			let currentIndex = 0;
 
 			function formatDate(dateStr) {
 				const [y, m, d] = dateStr.split("-").map(Number);
@@ -206,11 +258,27 @@
 				});
 			}
 
-			function openLightbox(src, alt, dateObserved, location) {
-				lightboxImg.src = src;
-				lightboxImg.alt = alt;
+			function showLightboxPhoto(index) {
+				const photo = currentPhotos[index];
+				if (!photo) return;
+
+				currentIndex = index;
+				lightboxImg.src = photoUrl(photo.original_photo_path || photo.photo_path, photo.photo_version);
+				lightboxImg.alt = photo.species_common_name;
 				lightboxCaption.textContent =
-					dateObserved && location ? `Photo taken on ${formatDate(dateObserved)} at ${location}` : "";
+					photo.date_observed && photo.location_name
+						? `Photo taken on ${formatDate(photo.date_observed)} at ${photo.location_name}`
+						: "";
+
+				const hasMultiple = currentPhotos.length > 1;
+				lightboxPrev.classList.toggle("is-hidden", !hasMultiple);
+				lightboxNext.classList.toggle("is-hidden", !hasMultiple);
+				lightboxCounter.textContent = hasMultiple ? `${index + 1} / ${currentPhotos.length}` : "";
+			}
+
+			function openLightbox(photos, index) {
+				currentPhotos = photos;
+				showLightboxPhoto(index);
 				lightbox.classList.add("is-visible");
 			}
 
@@ -218,13 +286,31 @@
 				lightbox.classList.remove("is-visible");
 				lightboxImg.src = "";
 				lightboxCaption.textContent = "";
+				lightboxCounter.textContent = "";
+				currentPhotos = [];
+				currentIndex = 0;
+			}
+
+			function showPrevPhoto() {
+				if (currentPhotos.length < 2) return;
+				showLightboxPhoto((currentIndex - 1 + currentPhotos.length) % currentPhotos.length);
+			}
+
+			function showNextPhoto() {
+				if (currentPhotos.length < 2) return;
+				showLightboxPhoto((currentIndex + 1) % currentPhotos.length);
 			}
 
 			lightbox.addEventListener("click", (e) => {
 				if (e.target === lightbox || e.target.closest(".bird-log-lightbox-close")) closeLightbox();
+				else if (e.target.closest(".bird-log-lightbox-prev")) showPrevPhoto();
+				else if (e.target.closest(".bird-log-lightbox-next")) showNextPhoto();
 			});
 			document.addEventListener("keydown", (e) => {
+				if (!lightbox.classList.contains("is-visible")) return;
 				if (e.key === "Escape") closeLightbox();
+				else if (e.key === "ArrowLeft") showPrevPhoto();
+				else if (e.key === "ArrowRight") showNextPhoto();
 			});
 
 			function matchesFilter(text, query) {
@@ -257,10 +343,9 @@
 						<span class="image thumb fit">
 							<img
 								src="${photoUrl(b.photo_path, b.photo_version)}"
-								data-full="${photoUrl(b.original_photo_path || b.photo_path, b.photo_version)}"
 								alt="${escapeHtml(b.species_common_name)}"
-								data-date-observed="${escapeHtml(b.cover_date)}"
-								data-location="${escapeHtml(b.cover_location)}"
+								data-species="${escapeHtml(b.species_common_name)}"
+								data-cover-sighting-id="${escapeHtml(b.cover_sighting_id)}"
 							/>
 						</span>
 						<div class="bird-card-caption">
@@ -273,14 +358,33 @@
 				document.getElementById("life-list-empty").style.display = filtered.length ? "none" : "block";
 
 				const totalSightings = lifeList.reduce((sum, b) => sum + b.sighting_count, 0);
+				const njPercent = ((lifeList.length / NJ_STATE_LIST_TOTAL) * 100).toFixed(1);
 				document.getElementById("bird-log-stats").textContent =
-					`${lifeList.length} species | ${totalSightings} sightings logged`;
+					`${lifeList.length} species | ${totalSightings} sightings logged | ` +
+					`${njPercent}% of the ${NJ_STATE_LIST_TOTAL} species on the NJ state list`;
+			}
+
+			function buildSightingsBySpecies(sightings) {
+				const map = new Map();
+				for (const sighting of sightings) {
+					const list = map.get(sighting.species_common_name) || [];
+					list.push(sighting);
+					map.set(sighting.species_common_name, list);
+				}
+				for (const list of map.values()) {
+					list.sort((a, b) => new Date(b.date_observed) - new Date(a.date_observed));
+				}
+				return map;
 			}
 
 			async function loadData() {
-				const { data, error } = await supabase.from("life_list").select("*");
+				const [lifeListRes, sightingsRes] = await Promise.all([
+					supabase.from("life_list").select("*"),
+					supabase.from("public_sightings").select("*"),
+				]);
 
-				if (error) {
+				if (lifeListRes.error || sightingsRes.error) {
+					const error = lifeListRes.error || sightingsRes.error;
 					const errorEl = document.getElementById("bird-log-error");
 					errorEl.textContent =
 						"Couldn't load the bird log right now (" +
@@ -291,7 +395,8 @@
 					return;
 				}
 
-				lifeList = data;
+				lifeList = lifeListRes.data;
+				sightingsBySpecies = buildSightingsBySpecies(sightingsRes.data);
 				renderLifeList();
 			}
 
@@ -301,9 +406,13 @@
 			document.getElementById("life-list-grid").addEventListener("click", (e) => {
 				const thumb = e.target.closest(".image.thumb");
 				const img = thumb && thumb.querySelector("img");
-				if (img) {
-					openLightbox(img.dataset.full || img.src, img.alt, img.dataset.dateObserved, img.dataset.location);
-				}
+				if (!img) return;
+
+				const photos = sightingsBySpecies.get(img.dataset.species) || [];
+				if (!photos.length) return;
+
+				const coverIndex = photos.findIndex((p) => p.id === img.dataset.coverSightingId);
+				openLightbox(photos, coverIndex === -1 ? 0 : coverIndex);
 			});
 
 			loadData();
