@@ -317,6 +317,20 @@
 				return text.toLowerCase().includes(query);
 			}
 
+			// Picks one random photo from all sightings, once per page load
+			// (cached so filtering/sorting doesn't swap it out).
+			let featuredPhoto = null;
+			function getPhotoOfTheDay() {
+				if (featuredPhoto) return featuredPhoto;
+				const all = [];
+				for (const list of sightingsBySpecies.values()) {
+					for (const s of list) if (s.photo_path) all.push(s);
+				}
+				if (!all.length) return null;
+				featuredPhoto = all[Math.floor(Math.random() * all.length)];
+				return featuredPhoto;
+			}
+
 			function renderLifeList() {
 				const query = document.getElementById("filterText").value.trim().toLowerCase();
 				const sortBy = document.getElementById("sortBy").value;
@@ -336,7 +350,24 @@
 				});
 
 				const grid = document.getElementById("life-list-grid");
-				grid.innerHTML = filtered
+				const potd = query ? null : getPhotoOfTheDay();
+				const potdHtml = potd
+					? `
+					<div class="col-4 col-6-medium col-12-small">
+						<span class="image thumb fit">
+							<img
+								src="${photoUrl(potd.photo_path, potd.photo_version)}"
+								alt="${escapeHtml(potd.species_common_name)}"
+								data-species="${escapeHtml(potd.species_common_name)}"
+								data-cover-sighting-id="${escapeHtml(potd.id)}"
+							/>
+						</span>
+						<div class="bird-card-caption">
+							<span class="common-name">Featured bird picture: ${escapeHtml(potd.species_common_name)}</span>
+						</div>
+					</div>`
+					: "";
+				grid.innerHTML = potdHtml + filtered
 					.map(
 						(b) => `
 					<div class="col-4 col-6-medium col-12-small">
